@@ -10,6 +10,7 @@ import {
   RecaptchaVerifier,
   updateProfile,
   sendEmailVerification,
+  sendPasswordResetEmail,
   reload
 } from 'firebase/auth';
 import { auth } from '../firebase/config';
@@ -69,6 +70,17 @@ export const authService = {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  },
+
+  // Send Password Reset Email
+  resetPassword: async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: window.location.origin // Redirect URL after password reset
+      });
     } catch (error) {
       throw new Error(error.message);
     }

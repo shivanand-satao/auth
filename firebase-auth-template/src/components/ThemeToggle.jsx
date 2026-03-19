@@ -11,12 +11,9 @@ const ThemeToggle = () => {
       setIsDark(true);
       document.documentElement.classList.add('dark');
     } else {
-      // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        setIsDark(true);
-        document.documentElement.classList.add('dark');
-      }
+      // Default to light mode
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
     }
   }, []);
 

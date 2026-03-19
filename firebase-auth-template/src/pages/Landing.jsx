@@ -149,8 +149,22 @@ const Landing = () => {
       </section>
 
       {/* Modals */}
-      <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} />
-      <RegisterModal isOpen={showRegister} onClose={() => setShowRegister(false)} />
+      <LoginModal 
+        isOpen={showLogin} 
+        onClose={() => setShowLogin(false)}
+        onSwitchToRegister={() => {
+          setShowLogin(false);
+          setShowRegister(true);
+        }}
+      />
+      <RegisterModal 
+        isOpen={showRegister} 
+        onClose={() => setShowRegister(false)}
+        onSwitchToLogin={() => {
+          setShowRegister(false);
+          setShowLogin(true);
+        }}
+      />
 
       {/* Footer */}
       <footer className="bg-gray-900 dark:bg-black text-gray-400 text-center py-8">

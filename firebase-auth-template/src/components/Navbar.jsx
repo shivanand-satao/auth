@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = ({ onLoginClick, onRegisterClick, onProfileClick }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, userProfile, isAuthenticated } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
 
   const handleLogout = async () => {
@@ -53,11 +53,19 @@ const Navbar = ({ onLoginClick, onRegisterClick, onProfileClick }) => {
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface2 transition"
               >
-                <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {user?.email?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                {userProfile?.photoURL ? (
+                  <img
+                    src={userProfile.photoURL}
+                    alt="Profile"
+                    className="w-8 h-8 rounded-full object-cover border-2 border-primary-500"
+                  />
+                ) : (
+                  <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    {userProfile?.displayName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                )}
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {user?.displayName || user?.email?.split('@')[0]}
+                  {userProfile?.displayName || user?.displayName || user?.email?.split('@')[0]}
                 </span>
               </button>
 

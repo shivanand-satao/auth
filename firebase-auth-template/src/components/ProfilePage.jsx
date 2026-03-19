@@ -1,14 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { Link, Mail, Phone, User, FileText, ArrowLeft, Image } from 'lucide-react';
+import { Link, Mail, Phone, User, FileText, ArrowLeft, Image, Upload } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { firestoreService } from '../services/firestoreService';
+import { storageService } from '../services/storageService';
 
 const ProfilePage = ({ onBack }) => {
   const { userProfile, setUserProfile } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const fileInputRef = useRef(null);
 
   // Check if profile data is loaded
   if (!userProfile) {
@@ -35,6 +38,31 @@ const ProfilePage = ({ onBack }) => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    setError('');
+    try {
+      // Compress and convert image to base64
+      const base64Image = await storageService.compressAndConvert(file);
+      
+      // Update form data with base64 image
+      setFormData(prev => ({
+        ...prev,
+        photoURL: base64Image
+      }));
+      
+      setSuccess('Image uploaded successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSaveProfile = async (e) => {
@@ -143,20 +171,40 @@ const ProfilePage = ({ onBack }) => {
             <form onSubmit={handleSaveProfile} className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Profile Picture URL
+                  Profile Picture
                 </label>
-                <div className="relative">
-                  <Image className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
-                  <input
-                    type="url"
-                    name="photoURL"
-                    value={formData.photoURL}
-                    onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
-                    placeholder="https://example.com/image.jpg"
-                  />
+                <div className="flex items-center gap-4">
+                  {formData.photoURL && (
+                    <img
+                      src={formData.photoURL}
+                      alt="Preview"
+                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface2 transition disabled:opacity-50"
+                    >
+                      <Upload size={20} className="text-gray-600 dark:text-gray-400" />
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                      </span>
+                    </button>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Max size: 1MB. Formats: JPG, PNG, GIF, WebP
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Paste a direct image URL (JPG or PNG)</p>
               </div>
 
               <div>
@@ -225,22 +273,6 @@ const ProfilePage = ({ onBack }) => {
                 <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
                   <Mail size={20} className="text-gray-400" />
                   <p className="text-gray-900 dark:text-white font-medium">{userProfile?.email}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Profile Picture URL</p>
-                <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
-                  <Image size={20} className="text-gray-400 mt-0.5" />
-                  <p className="text-gray-900 dark:text-white font-medium break-all text-sm">
-                    {userProfile?.photoURL ? (
-                      <a href={userProfile.photoURL} target="_blank" rel="noopener noreferrer" className="text-primary-600 dark:text-primary-400 hover:underline">
-                        {userProfile.photoURL}
-                      </a>
-                    ) : (
-                      'Not set'
-                    )}
-                  </p>
                 </div>
               </div>
 
