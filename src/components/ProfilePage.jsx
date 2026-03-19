@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Link, Mail, Phone, User, FileText, ArrowLeft, Image, Upload } from 'lucide-react';
+import { Mail, Phone, User, FileText, ArrowLeft, Upload, MapPin, Briefcase, Calendar, Globe, Linkedin, Github as GithubIcon, Twitter } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { firestoreService } from '../services/firestoreService';
 import { storageService } from '../services/storageService';
@@ -29,7 +29,17 @@ const ProfilePage = ({ onBack }) => {
     displayName: userProfile?.displayName || '',
     phoneNumber: userProfile?.phoneNumber || '',
     bio: userProfile?.bio || '',
-    photoURL: userProfile?.photoURL || ''
+    photoURL: userProfile?.photoURL || '',
+    location: userProfile?.location || '',
+    company: userProfile?.company || '',
+    jobTitle: userProfile?.jobTitle || '',
+    website: userProfile?.website || '',
+    linkedinUrl: userProfile?.linkedinUrl || '',
+    githubUrl: userProfile?.githubUrl || '',
+    twitterUrl: userProfile?.twitterUrl || '',
+    dateOfBirth: userProfile?.dateOfBirth || '',
+    skills: userProfile?.skills || '',
+    interests: userProfile?.interests || ''
   });
 
   const handleInputChange = (e) => {
@@ -92,228 +102,498 @@ const ProfilePage = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-dark-bg">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-dark-bg dark:to-gray-900">
       {/* Header */}
-      <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-2xl mx-auto px-6 py-6 flex items-center gap-4">
+      <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface2 rounded-lg transition text-gray-700 dark:text-gray-300"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+          </div>
           <button
-            onClick={onBack}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-surface2 rounded-lg transition text-gray-700 dark:text-gray-300"
+            onClick={() => {
+              if (isEditing) {
+                setFormData({
+                  displayName: userProfile?.displayName || '',
+                  phoneNumber: userProfile?.phoneNumber || '',
+                  bio: userProfile?.bio || '',
+                  photoURL: userProfile?.photoURL || '',
+                  location: userProfile?.location || '',
+                  company: userProfile?.company || '',
+                  jobTitle: userProfile?.jobTitle || '',
+                  website: userProfile?.website || '',
+                  linkedinUrl: userProfile?.linkedinUrl || '',
+                  githubUrl: userProfile?.githubUrl || '',
+                  twitterUrl: userProfile?.twitterUrl || '',
+                  dateOfBirth: userProfile?.dateOfBirth || '',
+                  skills: userProfile?.skills || '',
+                  interests: userProfile?.interests || ''
+                });
+              }
+              setIsEditing(!isEditing);
+              setError('');
+            }}
+            className="px-6 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-medium transition"
           >
-            <ArrowLeft size={24} />
+            {isEditing ? 'Cancel' : 'Edit Profile'}
           </button>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">My Profile</h1>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        {/* Profile Picture Section */}
-        <div className="bg-white dark:bg-dark-surface rounded-lg shadow p-8 mb-6">
-          <div className="flex flex-col items-center mb-6">
-            <div className="relative">
-              {userProfile?.photoURL ? (
-                <img
-                  src={userProfile.photoURL}
-                  alt="Profile"
-                  className="w-32 h-32 rounded-full object-cover border-4 border-primary-500"
-                />
-              ) : (
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center border-4 border-primary-500">
-                  <span className="text-4xl text-white font-bold">
-                    {userProfile?.displayName?.charAt(0) || 'U'}
-                  </span>
-                </div>
-              )}
-            </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
-              Click "Edit" below to change profile picture
-            </p>
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        {/* Alerts */}
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-lg mb-6 text-red-700 dark:text-red-400">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-3 rounded-lg mb-4 text-red-700 dark:text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-3 rounded-lg mb-4 text-green-700 dark:text-green-400 text-sm">
-              {success}
-            </div>
-          )}
-        </div>
-
-        {/* Profile Info Section */}
-        <div className="bg-white dark:bg-dark-surface rounded-lg shadow p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">Profile Information</h2>
-            <button
-              onClick={() => {
-                if (isEditing) {
-                  setFormData({
-                    displayName: userProfile?.displayName || '',
-                    phoneNumber: userProfile?.phoneNumber || '',
-                    bio: userProfile?.bio || '',
-                    photoURL: userProfile?.photoURL || ''
-                  });
-                }
-                setIsEditing(!isEditing);
-                setError('');
-              }}
-              className="px-4 py-2 border border-primary-600 text-primary-600 dark:text-primary-400 rounded-lg font-medium hover:bg-primary-50 dark:hover:bg-dark-surface2 transition"
-            >
-              {isEditing ? 'Cancel' : 'Edit'}
-            </button>
+        {success && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 p-4 rounded-lg mb-6 text-green-700 dark:text-green-400">
+            {success}
           </div>
+        )}
 
-          {isEditing ? (
-            <form onSubmit={handleSaveProfile} className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Profile Picture
-                </label>
-                <div className="flex items-center gap-4">
-                  {formData.photoURL && (
+        {/* Profile Header Card */}
+        <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg overflow-hidden mb-6">
+          {/* Cover Image */}
+          <div className="h-32 bg-gradient-to-r from-primary-500 to-primary-700"></div>
+          
+          {/* Profile Info */}
+          <div className="px-8 pb-8">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between -mt-16 mb-6">
+              <div className="flex flex-col md:flex-row md:items-end gap-6">
+                {/* Profile Picture */}
+                <div className="relative">
+                  {formData.photoURL || userProfile?.photoURL ? (
                     <img
-                      src={formData.photoURL}
-                      alt="Preview"
-                      className="w-20 h-20 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                      src={formData.photoURL || userProfile.photoURL}
+                      alt="Profile"
+                      className="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-dark-surface shadow-xl"
                     />
+                  ) : (
+                    <div className="w-32 h-32 rounded-full bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center border-4 border-white dark:border-dark-surface shadow-xl">
+                      <span className="text-5xl text-white font-bold">
+                        {userProfile?.displayName?.charAt(0) || 'U'}
+                      </span>
+                    </div>
                   )}
-                  <div className="flex-1">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                    />
+                  {isEditing && (
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploadingImage}
-                      className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-surface2 transition disabled:opacity-50"
+                      className="absolute bottom-0 right-0 p-2 bg-primary-600 hover:bg-primary-700 text-white rounded-full shadow-lg transition disabled:opacity-50"
                     >
-                      <Upload size={20} className="text-gray-600 dark:text-gray-400" />
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                      </span>
+                      <Upload size={16} />
                     </button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                      Max size: 1MB. Formats: JPG, PNG, GIF, WebP
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                </div>
+
+                {/* Name and Title */}
+                <div className="mb-4">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                    {userProfile?.displayName || 'User'}
+                  </h2>
+                  {userProfile?.jobTitle && (
+                    <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">
+                      {userProfile.jobTitle}
+                      {userProfile.company && ` at ${userProfile.company}`}
                     </p>
-                  </div>
+                  )}
+                  {userProfile?.location && (
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 mt-2">
+                      <MapPin size={16} />
+                      <span>{userProfile.location}</span>
+                    </div>
+                  )}
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+            {/* Bio */}
+            {userProfile?.bio && !isEditing && (
+              <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed">
+                {userProfile.bio}
+              </p>
+            )}
+
+            {/* Social Links */}
+            {!isEditing && (userProfile?.website || userProfile?.linkedinUrl || userProfile?.githubUrl || userProfile?.twitterUrl) && (
+              <div className="flex flex-wrap gap-3 mt-6">
+                {userProfile.website && (
+                  <a
+                    href={userProfile.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-dark-surface2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+                  >
+                    <Globe size={18} />
+                    <span className="text-sm font-medium">Website</span>
+                  </a>
+                )}
+                {userProfile.linkedinUrl && (
+                  <a
+                    href={userProfile.linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition"
+                  >
+                    <Linkedin size={18} />
+                    <span className="text-sm font-medium">LinkedIn</span>
+                  </a>
+                )}
+                {userProfile.githubUrl && (
+                  <a
+                    href={userProfile.githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-900 dark:hover:bg-gray-600 transition"
+                  >
+                    <GithubIcon size={18} />
+                    <span className="text-sm font-medium">GitHub</span>
+                  </a>
+                )}
+                {userProfile.twitterUrl && (
+                  <a
+                    href={userProfile.twitterUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 rounded-lg hover:bg-sky-100 dark:hover:bg-sky-900/30 transition"
+                  >
+                    <Twitter size={18} />
+                    <span className="text-sm font-medium">Twitter</span>
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Details */}
+        {isEditing ? (
+          /* Edit Mode */
+          <form onSubmit={handleSaveProfile} className="space-y-6">
+            {/* Personal Information */}
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Personal Information</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Full Name *
+                  </label>
                   <input
                     type="text"
                     name="displayName"
                     value={formData.displayName}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
-                    placeholder="Your name"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="John Doe"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    value={userProfile?.email}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Phone Number
+                  </label>
                   <input
                     type="tel"
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
-                    placeholder="+1 234 567 8900"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="+1 (555) 123-4567"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Bio
-                </label>
-                <div className="relative">
-                  <FileText className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="San Francisco, CA"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Bio
+                  </label>
                   <textarea
                     name="bio"
                     value={formData.bio}
                     onChange={handleInputChange}
                     rows="4"
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white resize-none"
                     placeholder="Tell us about yourself..."
                   />
                 </div>
               </div>
+            </div>
 
+            {/* Professional Information */}
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Professional Information</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Job Title
+                  </label>
+                  <input
+                    type="text"
+                    name="jobTitle"
+                    value={formData.jobTitle}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="Software Engineer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Company
+                  </label>
+                  <input
+                    type="text"
+                    name="company"
+                    value={formData.company}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="Tech Corp"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Skills
+                  </label>
+                  <input
+                    type="text"
+                    name="skills"
+                    value={formData.skills}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="JavaScript, React, Node.js, Python"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate skills with commas</p>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Interests
+                  </label>
+                  <input
+                    type="text"
+                    name="interests"
+                    value={formData.interests}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="AI, Web Development, Open Source"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate interests with commas</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Links */}
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Social Links</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Website
+                  </label>
+                  <input
+                    type="url"
+                    name="website"
+                    value={formData.website}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="https://yourwebsite.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    LinkedIn URL
+                  </label>
+                  <input
+                    type="url"
+                    name="linkedinUrl"
+                    value={formData.linkedinUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="https://linkedin.com/in/username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    GitHub URL
+                  </label>
+                  <input
+                    type="url"
+                    name="githubUrl"
+                    value={formData.githubUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="https://github.com/username"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Twitter URL
+                  </label>
+                  <input
+                    type="url"
+                    name="twitterUrl"
+                    value={formData.twitterUrl}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-dark-surface2 dark:text-white"
+                    placeholder="https://twitter.com/username"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex justify-end gap-4">
+              <button
+                type="button"
+                onClick={() => setIsEditing(false)}
+                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-dark-surface2 transition"
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white py-2 rounded-lg font-medium transition"
+                className="px-8 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-gray-400 text-white rounded-lg font-semibold transition shadow-lg"
               >
                 {loading ? 'Saving...' : 'Save Changes'}
               </button>
-            </form>
-          ) : (
-            <div className="space-y-6">
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Email</p>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
-                  <Mail size={20} className="text-gray-400" />
+            </div>
+          </form>
+        ) : (
+          /* View Mode */
+          <div className="space-y-6">
+            {/* Personal Information */}
+            <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Personal Information</h3>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Email</p>
                   <p className="text-gray-900 dark:text-white font-medium">{userProfile?.email}</p>
                 </div>
-              </div>
 
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Full Name</p>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
-                  <User size={20} className="text-gray-400" />
+                {userProfile?.phoneNumber && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Phone</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{userProfile.phoneNumber}</p>
+                  </div>
+                )}
+
+                {userProfile?.dateOfBirth && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Date of Birth</p>
+                    <p className="text-gray-900 dark:text-white font-medium">{new Date(userProfile.dateOfBirth).toLocaleDateString()}</p>
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Member Since</p>
                   <p className="text-gray-900 dark:text-white font-medium">
-                    {userProfile?.displayName || 'Not set'}
+                    {userProfile?.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
                   </p>
                 </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Phone Number</p>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
-                  <Phone size={20} className="text-gray-400" />
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {userProfile?.phoneNumber || 'Not set'}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Bio</p>
-                <div className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-dark-surface2 rounded-lg">
-                  <FileText size={20} className="text-gray-400 mt-0.5" />
-                  <p className="text-gray-900 dark:text-white font-medium">
-                    {userProfile?.bio || 'Not set'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-600">
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Account created: {userProfile?.createdAt?.toDate?.()?.toLocaleDateString() || 'N/A'}
-                </p>
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Professional Information */}
+            {(userProfile?.skills || userProfile?.interests) && (
+              <div className="bg-white dark:bg-dark-surface rounded-xl shadow-lg p-8">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Professional Information</h3>
+                
+                {userProfile?.skills && (
+                  <div className="mb-6">
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Skills</p>
+                    <div className="flex flex-wrap gap-2">
+                      {userProfile.skills.split(',').map((skill, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium"
+                        >
+                          {skill.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {userProfile?.interests && (
+                  <div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">Interests</p>
+                    <div className="flex flex-wrap gap-2">
+                      {userProfile.interests.split(',').map((interest, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium"
+                        >
+                          {interest.trim()}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
