@@ -39,16 +39,22 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     setLoading(true);
     try {
       const user = await authService.loginWithGoogle();
-      const profile = await firestoreService.getUserProfile(user.uid);
-      if (!profile) {
+      
+      // Try to get existing profile, create if doesn't exist
+      try {
+        const profile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        // Profile doesn't exist, create it
         await firestoreService.createUserProfile(user.uid, {
           email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL
+          displayName: user.displayName || user.email?.split('@')[0] || 'User',
+          photoURL: user.photoURL || ''
         });
+        const newProfile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(newProfile);
       }
-      const newProfile = await firestoreService.getUserProfile(user.uid);
-      setUserProfile(newProfile);
+      
       onClose();
     } catch (err) {
       setError(err.message);
@@ -61,16 +67,22 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     setLoading(true);
     try {
       const user = await authService.loginWithGithub();
-      const profile = await firestoreService.getUserProfile(user.uid);
-      if (!profile) {
+      
+      // Try to get existing profile, create if doesn't exist
+      try {
+        const profile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        // Profile doesn't exist, create it
         await firestoreService.createUserProfile(user.uid, {
           email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL
+          displayName: user.displayName || user.email?.split('@')[0] || 'User',
+          photoURL: user.photoURL || ''
         });
+        const newProfile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(newProfile);
       }
-      const newProfile = await firestoreService.getUserProfile(user.uid);
-      setUserProfile(newProfile);
+      
       onClose();
     } catch (err) {
       setError(err.message);

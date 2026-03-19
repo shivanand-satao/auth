@@ -113,13 +113,23 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     setLoading(true);
     try {
       const user = await authService.loginWithGoogle();
-      await firestoreService.createUserProfile(user.uid, {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      });
-      const profile = await firestoreService.getUserProfile(user.uid);
-      setUserProfile(profile);
+      
+      // Try to get existing profile, create if doesn't exist
+      try {
+        const profile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        // Profile doesn't exist, create it
+        await firestoreService.createUserProfile(user.uid, {
+          email: user.email,
+          displayName: user.displayName || user.email?.split('@')[0] || 'User',
+          photoURL: user.photoURL || '',
+          bio: ''
+        });
+        const newProfile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(newProfile);
+      }
+      
       onClose();
     } catch (err) {
       setError(err.message);
@@ -132,13 +142,23 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     setLoading(true);
     try {
       const user = await authService.loginWithGithub();
-      await firestoreService.createUserProfile(user.uid, {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL
-      });
-      const profile = await firestoreService.getUserProfile(user.uid);
-      setUserProfile(profile);
+      
+      // Try to get existing profile, create if doesn't exist
+      try {
+        const profile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(profile);
+      } catch (error) {
+        // Profile doesn't exist, create it
+        await firestoreService.createUserProfile(user.uid, {
+          email: user.email,
+          displayName: user.displayName || user.email?.split('@')[0] || 'User',
+          photoURL: user.photoURL || '',
+          bio: ''
+        });
+        const newProfile = await firestoreService.getUserProfile(user.uid);
+        setUserProfile(newProfile);
+      }
+      
       onClose();
     } catch (err) {
       setError(err.message);
